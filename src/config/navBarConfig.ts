@@ -33,8 +33,16 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		],
 	});
 
-	// 友链
-	links.push(LinkPresets.Friends);
+		// 个人工作台（外链，跳阿里云自建应用）
+		links.push({
+			name: "工作台",
+			url: "https://app.kavres.top:18080",
+			external: true,
+			icon: "material-symbols:dashboard",
+		});
+
+		// 友链
+		links.push(LinkPresets.Friends);
 
 	// 留言板
 	links.push(LinkPresets.Guestbook);
@@ -62,9 +70,6 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		url: "#",
 		icon: "material-symbols:info",
 		children: [
-			// 打赏
-			LinkPresets.Sponsor,
-
 			// 关于页面
 			LinkPresets.About,
 		],
@@ -79,19 +84,11 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		children: [
 			{
 				name: "GitHub",
-				url: "https://github.com/kavres",
+				url: "https://github.com/sukavres",
 				external: true,
 				icon: "fa7-brands:github",
 			},
 		],
-	});
-
-	// 个人工作台（外链，跳阿里云自建应用；端口待定，稍后替换）
-	links.push({
-		name: "工作台",
-		url: "http://8.134.142.99:9000",
-		external: true,
-		icon: "material-symbols:dashboard",
 	});
 
 	// 文档链接
