@@ -54,7 +54,7 @@ export const commentConfig: CommentConfig = {
 	//giscus评论系统配置
 	giscus: {
 		// 设置 Giscus 评论系统仓库
-		repo: "sukavres/firefly-site",
+		repo: "sukavres/kavres-site",
 		// 设置 Giscus 评论系统仓库ID
 		repoId: "R_kgD_替换为你的仓库ID_从giscus.app获取",
 		// 设置 Giscus 评论系统分类
