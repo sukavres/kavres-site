@@ -41,15 +41,7 @@ export const commentConfig: CommentConfig = {
 		visitorCount: true,
 	},
 
-	// artalk评论系统配置
-	artalk: {
-		// artalk后端程序 API 地址
-		server: "https://artalk.example.com/",
-		// 设置 Artalk 语言
-		locale: "zh-CN",
-		// 是否启用文章访问量统计功能
-		visitorCount: true,
-	},
+	// artalk 未启用（当前使用 giscus），占位配置已移除
 
 	//giscus评论系统配置
 	giscus: {
@@ -77,9 +69,5 @@ export const commentConfig: CommentConfig = {
 		loading: "lazy",
 	},
 
-	//disqus评论系统配置
-	disqus: {
-		// 获取 Disqus 评论系统
-		shortname: "firefly",
-	},
+	// disqus 未启用（当前使用 giscus），占位配置已移除
 };

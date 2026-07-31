@@ -86,6 +86,14 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		],
 	});
 
+	// 个人工作台（外链，跳阿里云自建应用；端口待定，稍后替换）
+	links.push({
+		name: "工作台",
+		url: "http://8.134.142.99:9000",
+		external: true,
+		icon: "material-symbols:dashboard",
+	});
+
 	// 文档链接
 	// links.push({
 	// 	name: "文档",
