@@ -61,7 +61,7 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 			{
 				name: "今天只做一件事",
 				artist: "陳奕迅",
-				url: "/assets/music/陳奕迅 - 今天只做一件事.flac",
+				url: "/assets/music/陳奕迅 - 今天只做一件事.mp3",
 				cover: "",
 				lrc: "",
 			},
