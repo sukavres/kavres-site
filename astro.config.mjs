@@ -57,7 +57,8 @@ const adapter = process.env.CF_WORKERS
 export default defineConfig({
 	site: siteConfig.site_url,
 
-	base: "/",
+	// GitHub Pages 子路径部署（绑定自定义域名后改为 "/"）
+	base: "/kavres-site/",
 	trailingSlash: "always",
 
 	// 字体配置 - 只加载实际使用的字体，跳过未引用的以加快构建
