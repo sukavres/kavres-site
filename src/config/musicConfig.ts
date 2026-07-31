@@ -11,7 +11,7 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 	showInNavbar: true,
 
 	// 使用方式："meting" 使用 Meting API，"local" 使用本地音乐列表
-	mode: "meting",
+	mode: "local",
 
 	// 默认音量 (0-1)
 	volume: 0.7,
@@ -49,12 +49,20 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 	// 2. 或者直接填入歌词字符串内容
 	// lrc: "[00:00.00]歌词内容...",
 	local: {
+		// 自动生成，勿手改；重新生成请运行 build_music_playlist.py
 		playlist: [
 			{
-				name: "使一颗心免于哀伤",
-				artist: "知更鸟 / HOYO-MiX / Chevy",
-				url: "/assets/music/使一颗心免于哀伤-哼唱.mp3",
-				cover: "/assets/music/cover/109951169585655912.webp",
+				name: "大城小爱",
+				artist: "王力宏",
+				url: "/assets/music/王力宏 - 大城小爱.mp3",
+				cover: "",
+				lrc: "",
+			},
+			{
+				name: "今天只做一件事",
+				artist: "陳奕迅",
+				url: "/assets/music/陳奕迅 - 今天只做一件事.flac",
+				cover: "",
 				lrc: "",
 			},
 		],
