@@ -30,6 +30,7 @@ const localPlaylist =
 
 const managerConfigStr = JSON.stringify({
 	mode: config.mode,
+	api: config.api,
 	meting: config.meting,
 	localPlaylist: localPlaylist,
 	volume: config.volume ?? 0.7,
@@ -126,6 +127,40 @@ const managerConfigStr = JSON.stringify({
     // ── Event helpers ────────────────────────────────────────
     function emit(name, detail) {
         window.dispatchEvent(new CustomEvent(name, { detail: detail || {} }));
+    }
+
+    // ── 自建后端曲库（app.kavres.top 工作台）─────────────────
+    // 返回 true 表示成功拿到非空歌单；false 表示需要回退到 Meting
+    async function fetchWorkbenchData() {
+        var a = config.api;
+        if (!a || !a.url) return false;
+
+        var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, a.timeout || 6000) : null;
+
+        try {
+            var res = await fetch(a.url, ctrl ? { signal: ctrl.signal } : undefined);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            var data = await res.json();
+            var tracks = Array.isArray(data) ? data : (data && data.tracks) || [];
+            if (!tracks.length) return false;   // 曲库还空着，交给回退逻辑
+
+            state.playlist = tracks.map(function (item) {
+                return {
+                    name: item.name || item.title || 'Unknown',
+                    artist: item.artist || item.author || 'Unknown',
+                    url: item.url,
+                    pic: item.cover || item.pic || '',
+                    lrc: item.lrc
+                };
+            });
+            return true;
+        } catch (e) {
+            console.warn('Workbench music API failed', e);
+            return false;
+        } finally {
+            if (timer) clearTimeout(timer);
+        }
     }
 
     // ── Meting fetch ─────────────────────────────────────────
@@ -355,7 +390,13 @@ const managerConfigStr = JSON.stringify({
         state.initializing = true;
 
         try {
-            if (config.mode === 'meting' && config.meting) {
+            if (config.mode === 'api') {
+                var ok = await fetchWorkbenchData();
+                // 自建曲库为空或不可达时回退 Meting，避免播放器直接空掉
+                if (!ok && config.api && config.api.fallbackToMeting !== false && config.meting) {
+                    await fetchMetingData();
+                }
+            } else if (config.mode === 'meting' && config.meting) {
                 await fetchMetingData();
             } else if (config.mode === 'local') {
                 state.playlist = config.localPlaylist || [];

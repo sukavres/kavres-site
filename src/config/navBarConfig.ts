@@ -36,7 +36,7 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		// 个人工作台（外链，跳阿里云自建应用）
 		links.push({
 			name: "工作台",
-			url: "https://app.kavres.top:18080",
+			url: "https://app.kavres.top:18790",
 			external: true,
 			icon: "material-symbols:dashboard",
 		});

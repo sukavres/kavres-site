@@ -10,8 +10,8 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 	// 是否在导航栏显示音乐播放器入口
 	showInNavbar: true,
 
-	// 使用方式："meting" 使用 Meting API，"local" 使用本地音乐列表
-	mode: "meting",
+	// 使用方式："api" 自建后端曲库，"meting" Meting API，"local" 本地音乐列表
+	mode: "api",
 
 	// 默认音量 (0-1)
 	volume: 0.7,
@@ -21,6 +21,14 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 
 	// 是否显启用歌词
 	showLyrics: true,
+
+	// 自建后端曲库（Kavres 工作台，音频走同域 Range 流，稳定可控）
+	// 曲库为空或接口不可用时会自动回退到下面的 Meting 歌单，不会出现空播放器
+	api: {
+		url: "https://app.kavres.top:18790/api/music/tracks",
+		fallbackToMeting: true,
+		timeout: 6000,
+	},
 
 	// Meting API 配置
 	meting: {

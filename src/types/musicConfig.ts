@@ -1,7 +1,10 @@
 // 音乐播放器配置
 export type MusicPlayerConfig = {
-	// 使用方式：'meting' 或 'local'
-	mode?: "meting" | "local"; // "meting" 使用 Meting API，"local" 使用本地音乐列表
+	// 使用方式：'api' | 'meting' | 'local'
+	// "api"    从自建后端拉歌单（app.kavres.top 工作台曲库）
+	// "meting" 使用 Meting API
+	// "local"  使用本地音乐列表
+	mode?: "api" | "meting" | "local";
 
 	// 默认音量 (0-1)
 	volume?: number;
@@ -14,6 +17,18 @@ export type MusicPlayerConfig = {
 
 	// 是否在导航栏显示音乐播放器
 	showInNavbar?: boolean;
+
+	// 自建后端曲库配置（当 mode 为 'api' 时使用）
+	api?: {
+		// 歌单接口地址，需返回 { tracks: [{ name, artist, url, cover, lrc }] }
+		url?: string;
+
+		// 接口不可用或曲库为空时，是否自动回退到 Meting 歌单
+		fallbackToMeting?: boolean;
+
+		// 请求超时（毫秒），超时即触发回退，避免播放器卡住
+		timeout?: number;
+	};
 
 	// Meting API 配置
 	meting?: {
