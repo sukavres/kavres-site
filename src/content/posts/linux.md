@@ -336,7 +336,7 @@ Tar命令工具除了用于日常打包、解压源码包或者压缩包外，�
 
 1） /root 目录创建jingfeng文件夹，同时在jingfeng文件夹中，新建jf.txt，jf2.txt。文件，
 
-![image-20221128162541132](Linux.assets/image-20221128162541132.png)
+> 【本地图片未上传】image-20221128162541132
 
 2）使用tar命令第一次完整备份jingfeng文件夹中的内容，-g指定快照snapshot文件，第一次没有该文件会自动创建
 
@@ -344,7 +344,7 @@ cd /root/jingfeng/
 
 tar -g /data/backup/snapshot -czvf /data/backup/2019jingfeng.tar.gz
 
-![image-20221128162558432](Linux.assets/image-20221128162558432.png)
+> 【本地图片未上传】image-20221128162558432
 
 3)使用tar命令第一次完整备份jingfeng文件夹之后，会生成快照文件  /data/backup/snapshot ，后期增量备份会以snapshot文件为参考，在jingfeng文件夹中再创建jf3.txt jf4.txt，然后通过tar命令增量备份jingfeng目录所有内容
 
@@ -354,7 +354,7 @@ touch jf3.txt jf4.txt
 
 tar -g /data/backup/snapshot -czvf /data/backup/2019jingfeng_add1.tar.gz *
 
-![image-20221128162612447](Linux.assets/image-20221128162612447.png)
+> 【本地图片未上传】image-20221128162612447
 
 增量备份时，需-g指定第一次完整备份的快照snapshot文件，同时增量打包的文件名不能跟第一次备份后的文件名重复，通过tar -tf可以查看打包后的文件内容
 
