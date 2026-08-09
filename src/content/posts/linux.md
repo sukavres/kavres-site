@@ -2,6 +2,7 @@
 title: 'Linux'
 published: 2026-08-08
 category: '技术'
+password: 'kavres'
 draft: false
 ---
 
