@@ -15,17 +15,10 @@ export const siteConfig: SiteConfig = {
 	site_url: "https://www.kavres.top",
 
 	// 站点描述
-	description:
-		"个人技术博客与知识库，记录技术探索与生活点滴。",
+	description: "个人技术博客与知识库，记录技术探索与生活点滴。",
 
 	// 站点关键词
-	keywords: [
-		"Astro",
-		"ACGN",
-		"博客",
-		"技术博客",
-		"静态博客",
-	],
+	keywords: ["Astro", "ACGN", "博客", "技术博客", "静态博客"],
 
 	// 主题色
 	themeColor: {

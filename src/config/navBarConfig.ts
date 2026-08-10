@@ -33,16 +33,16 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		],
 	});
 
-		// 个人工作台（外链，跳阿里云自建应用）
-		links.push({
-			name: "工作台",
-			url: "https://app.kavres.top:18790",
-			external: true,
-			icon: "material-symbols:dashboard",
-		});
+	// 个人工作台（外链，跳阿里云自建应用）
+	links.push({
+		name: "工作台",
+		url: "https://app.kavres.top:18790",
+		external: true,
+		icon: "material-symbols:dashboard",
+	});
 
-		// 友链
-		links.push(LinkPresets.Friends);
+	// 友链
+	links.push(LinkPresets.Friends);
 
 	// 留言板
 	links.push(LinkPresets.Guestbook);
