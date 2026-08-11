@@ -1,6 +1,6 @@
 ---
 title: 'Linux'
-published: 2026-08-09
+published: 2026-08-11
 category: '技术'
 draft: false
 ---
