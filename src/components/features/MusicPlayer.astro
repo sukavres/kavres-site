@@ -647,6 +647,12 @@ const widgetId =
         }
     });
 
+    // 后台静默刷新曲库（命中本地缓存时）：按当前播放索引重建列表，不打断播放
+    on('fm:playlist-updated', function (e) {
+        var d = e.detail;
+        renderPlaylist(d.playlist, d.currentIndex);
+    });
+
     on('fm:track', function (e) {
         var d = e.detail;
         updateTrackUI(d.track);

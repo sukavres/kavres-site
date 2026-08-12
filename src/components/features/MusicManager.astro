@@ -129,6 +129,28 @@ const managerConfigStr = JSON.stringify({
         window.dispatchEvent(new CustomEvent(name, { detail: detail || {} }));
     }
 
+    // ── 主站音乐清单本地缓存 ──────────────────────────────
+    // 曲库来自跨源 ECS，每次页面加载都发一次请求；缓存到 localStorage 后重复访问秒出，
+    // 后台静默刷新，不阻塞首屏、不打断正在播放的曲目。
+    var CACHE_KEY = 'firefly-music-cache-v1';
+    var CACHE_TTL = 30 * 60 * 1000;  // 30 分钟
+    function loadCachedPlaylist() {
+        try {
+            var raw = localStorage.getItem(CACHE_KEY);
+            if (!raw) return null;
+            var obj = JSON.parse(raw);
+            if (!obj || !Array.isArray(obj.playlist)) return null;
+            return obj;
+        } catch (e) { return null; }
+    }
+    function savePlaylistCache(list) {
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify({ playlist: list, ts: Date.now() })); } catch (e) {}
+    }
+    function setPlaylist(list) {
+        state.playlist = list;
+        emit('fm:playlist-updated', { playlist: list, currentIndex: state.currentIndex });
+    }
+
     // ── 自建后端曲库（app.kavres.top 工作台）─────────────────
     // 返回 true 表示成功拿到非空歌单；false 表示需要回退到 Meting
     async function fetchWorkbenchData() {
@@ -154,6 +176,8 @@ const managerConfigStr = JSON.stringify({
                     lrc: item.lrc
                 };
             });
+            savePlaylistCache(tracks);
+            if (state.initialized) setPlaylist(tracks);  // 已渲染过则静默刷新列表，不打断播放
             return true;
         } catch (e) {
             console.warn('Workbench music API failed', e);
@@ -385,51 +409,59 @@ const managerConfigStr = JSON.stringify({
     });
 
     // ── Init (idempotent) ────────────────────────────────────
+    function finishInit() {
+        if (state.playlist.length > 0) {
+            audio.volume = state.volume;
+            var startIndex = 0;
+            if (state.playMode === 2) {
+                startIndex = Math.floor(Math.random() * state.playlist.length);
+            }
+            state.initialized = true;
+            emit('fm:init', {
+                playlist: state.playlist,
+                playMode: state.playMode,
+                volume: state.volume,
+                isMuted: state.isMuted
+            });
+            loadTrack(startIndex, false);
+        } else {
+            state.initialized = true;
+            emit('fm:init', {
+                playlist: [],
+                playMode: state.playMode,
+                volume: state.volume,
+                isMuted: state.isMuted
+            });
+            emit('fm:error', { message: config.i18n.noSongs });
+        }
+    }
+
     async function init() {
         if (state.initialized || state.initializing) return;
         state.initializing = true;
 
         try {
             if (config.mode === 'api') {
+                // 命中本地缓存：立即用缓存渲染（秒出，不阻塞首屏），后台再静默刷新
+                var cached = loadCachedPlaylist();
+                if (cached && (Date.now() - (cached.ts || 0)) < CACHE_TTL && cached.playlist.length > 0) {
+                    state.playlist = cached.playlist;
+                    finishInit();
+                    fetchWorkbenchData();   // 忽略结果：成功则 setPlaylist 刷新列表，失败保留缓存
+                    return;
+                }
                 var ok = await fetchWorkbenchData();
                 // 自建曲库为空或不可达时回退 Meting，避免播放器直接空掉
                 if (!ok && config.api && config.api.fallbackToMeting !== false && config.meting) {
                     await fetchMetingData();
                 }
+                finishInit();
             } else if (config.mode === 'meting' && config.meting) {
                 await fetchMetingData();
+                finishInit();
             } else if (config.mode === 'local') {
                 state.playlist = config.localPlaylist || [];
-            }
-
-            if (state.playlist.length > 0) {
-                // Apply volume
-                audio.volume = state.volume;
-
-                var startIndex = 0;
-                if (state.playMode === 2) {
-                    startIndex = Math.floor(Math.random() * state.playlist.length);
-                }
-
-                state.initialized = true;
-
-                emit('fm:init', {
-                    playlist: state.playlist,
-                    playMode: state.playMode,
-                    volume: state.volume,
-                    isMuted: state.isMuted
-                });
-
-                loadTrack(startIndex, false);
-            } else {
-                state.initialized = true;
-                emit('fm:init', {
-                    playlist: [],
-                    playMode: state.playMode,
-                    volume: state.volume,
-                    isMuted: state.isMuted
-                });
-                emit('fm:error', { message: config.i18n.noSongs });
+                finishInit();
             }
         } catch (e) {
             console.error('Music Manager init error:', e);
@@ -449,6 +481,7 @@ const managerConfigStr = JSON.stringify({
     // ── Public API ───────────────────────────────────────────
     window.__fireflyMusic = {
         init: init,
+        setPlaylist: setPlaylist,
         getState: function () {
             var track = state.playlist[state.currentIndex] || null;
             return {
