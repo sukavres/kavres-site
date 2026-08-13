@@ -1,6 +1,7 @@
 ---
 title: 'H3C-S2126-EI交换机-SSH配置指南'
 published: 2026-08-13
+category: '数据通信'
 draft: false
 ---
 
