@@ -530,4 +530,3 @@ snmp-agent target-host trap address udp-domain 192.168.1.100 params securityname
 ---
 
 > 📝 **文档说明：** 本文档基于 H3C S2126-EI（Comware V3.10, Release 2211P06）实测整理，不同版本命令可能略有差异，请以设备实际 `?` 帮助信息为准。
-
