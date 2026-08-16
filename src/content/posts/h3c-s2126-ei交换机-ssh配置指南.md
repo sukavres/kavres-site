@@ -57,7 +57,17 @@ public-key local create rsa
 >
 > ⚠️ **关键原理**：未生成密钥时，`ssh server enable` 等 SSH 命令会被系统隐藏，导致"命令未识别"报错。生成密钥后所有 SSH 命令才会显现。
 
-### 3.2 创建本地用户并配置权限
+### 3.2 配置管理 IP（VLAN 接口，SSH 登录地址）
+
+```text
+interface Vlan-interface 1
+ ip address 192.168.1.250 255.255.255.0
+ quit
+```
+
+> **注释**：配置交换机的管理 IP，即 SSH 客户端连接时填的地址。必须与本文 **4.2 登录测试** 以及 **SNMP 文档中的设备管理 IP** 保持一致——本例统一为 `192.168.1.250`、位于 `Vlan-interface 1`。若管理 VLAN 不是 1，替换接口名与对应 IP 即可。
+
+### 3.3 创建本地用户并配置权限
 
 ```text
 system-view
@@ -74,7 +84,7 @@ local-user sshadmin
 > - ⚠️ 此设备**不支持** V7 的 `class manage` 写法，权限级别直接写在 `service-type` 后。
 > - 💡 `password simple` 以明文形式保存配置中的密码；若设备支持 `password cipher`，建议改用 `password cipher <密文>` 提高安全性。
 
-### 3.3 指定 SSH 用户认证方式
+### 3.4 指定 SSH 用户认证方式
 
 ```text
 ssh user sshadmin authentication-type password
@@ -82,7 +92,7 @@ ssh user sshadmin authentication-type password
 
 > **注释**：老版本 Comware V5/V3 必须显式指定 SSH 用户的认证方式，否则可能登录失败。
 
-### 3.4 配置 VTY 线路（强制仅允许 SSH）
+### 3.5 配置 VTY 线路（强制仅允许 SSH）
 
 ```text
 user-interface vty 0 4
@@ -96,7 +106,7 @@ user-interface vty 0 4
 | `authentication-mode scheme` | 使用本地账号密码认证（AAA 本地方案） |
 | `protocol inbound ssh` | 关闭 Telnet，仅允许 SSH 接入 |
 
-### 3.5 保存配置
+### 3.6 保存配置
 
 ```text
 save
@@ -131,7 +141,7 @@ display user-interface vty 0 4
 | 端口 | 22 |
 | 用户名 | sshadmin |
 | 密码 | Admin@2024! |
-| 地址 | 交换机管理 IP（如 VLAN 1 的 192.168.1.250） |
+| 地址 | 交换机管理 IP（即 VLAN 1 的 192.168.1.250，见 3.2 步配置） |
 
 > 登录成功并显示命令行提示符即配置完成 ✅
 
@@ -178,6 +188,11 @@ system-view
 # ---- 生成 RSA 密钥（SSH 前置）----
 public-key local create rsa
 # 提示时直接回车，使用默认值 1024
+
+# ---- 配置管理 IP（SSH 登录地址，与 SNMP 文档一致）----
+interface Vlan-interface 1
+ ip address 192.168.1.250 255.255.255.0
+ quit
 
 # ---- 创建本地用户 ----
 local-user sshadmin
