@@ -1,6 +1,6 @@
 ---
 title: 'H3C-S2126-EI-SNMP配置指南'
-published: 2026-08-13
+published: 2026-08-16
 category: '数据通信'
 draft: false
 ---
@@ -24,6 +24,7 @@ draft: false
 | 内存 | 64MB SDRAM |
 | Flash | 8MB |
 | 端口 | 24×FE + 2×GE（Subslot 0/1/2） |
+| 管理 IP | 192.168.1.250（Vlan-interface 1） |
 
 ---
 
@@ -137,12 +138,12 @@ snmp-agent trap enable flash
 #### 5.2 指定 Trap 目标主机
 
 ```bash
-snmp-agent target-host trap address udp-domain 192.168.1.100 params securityname public v2c
+snmp-agent target-host trap address udp-domain 192.168.1.240 params securityname public v2c
 ```
 
 | 参数 | 含义 | 示例 |
 |---|---|---|
-| `192.168.1.100` | 网管服务器 IP 地址 | 替换成你的实际 IP |
+| `192.168.1.240` | 网管服务器 IP 地址 | 替换成你的实际 IP |
 | `public` | 团体名（要和网管平台一致） | 替换成你的团体名 |
 | `v2c` | SNMP 版本 | 和网管平台保持一致 |
 
@@ -160,7 +161,7 @@ snmp-agent target-host trap address udp-domain 192.168.1.101 params securityname
 ```bash
 snmp-agent trap source Vlan-interface 1
 ```
-> 如果管理 VLAN 不是 VLAN 1，替换成实际的 VLAN 接口号。
+> 如果管理 VLAN 不是 VLAN 1，替换成实际的 VLAN 接口号。本设备管理 IP 为 `192.168.1.250`（位于 Vlan-interface 1），Trap 将以该地址为源，与 SSH 文档保持一致。
 
 ---
 
@@ -181,6 +182,11 @@ save
 ```bash
 system-view
 
+# === 设备管理 IP（SSH / Trap / Syslog 源地址，与 SSH 文档统一为 192.168.1.250）===
+interface Vlan-interface 1
+ ip address 192.168.1.250 255.255.255.0
+ quit
+
 # === SNMP 基础配置 ===
 snmp-agent
 snmp-agent sys-info version v2c
@@ -192,12 +198,12 @@ snmp-agent trap enable system
 snmp-agent trap enable standard
 snmp-agent trap enable configuration
 snmp-agent trap enable flash
-snmp-agent target-host trap address udp-domain 192.168.1.100 params securityname public v2c
+snmp-agent target-host trap address udp-domain 192.168.1.240 params securityname public v2c
 snmp-agent trap source Vlan-interface 1
 
 # === Syslog 日志服务器配置 ===
 info-center enable
-info-center loghost 192.168.1.200
+info-center loghost 192.168.1.240
 info-center loghost source Vlan-interface 1
 info-center source default channel loghost log level informational
 
@@ -207,10 +213,11 @@ save
 ```
 
 > 📌 **使用前请修改以下参数：**
+> - `192.168.1.250` → 你的交换机管理 IP（与 SSH 文档统一；若已配置可跳过）
 > - `public` → 你的只读团体名
 > - `private` → 你的读写团体名
-> - `192.168.1.100` → 你的网管服务器 IP
-> - `192.168.1.200` → 你的 Syslog 日志服务器 IP
+> - `192.168.1.240` → 你的网管服务器 IP
+> - `192.168.1.240` → 你的 Syslog 日志服务器 IP
 > - `Vlan-interface 1` → 你的管理 VLAN 接口
 
 ---
@@ -241,7 +248,7 @@ info-center enable
 #### 步骤 2：指定日志主机（Syslog 服务器）
 
 ```text
-info-center loghost 192.168.1.200
+info-center loghost 192.168.1.240
 ```
 
 > 说明：默认使用 **UDP 514** 端口。若日志服务器端口不同，可追加 `port <端口号>`；如需指定 facility，追加 `facility local4`（local0~local7 任选，需与服务器侧一致）。
@@ -252,7 +259,7 @@ info-center loghost 192.168.1.200
 info-center loghost source Vlan-interface 1
 ```
 
-> 说明：固定用管理 VLAN 接口的 IP 作为 Syslog 源地址，便于日志服务器识别设备。若交换机有多个 IP，不配此项可能选到不可达地址，导致服务器收不到日志。
+> 说明：固定用管理 VLAN 接口的 IP 作为 Syslog 源地址，便于日志服务器识别设备。本设备管理 IP 为 `192.168.1.250`（Vlan-interface 1），与 SSH 文档统一。若交换机有多个 IP，不配此项可能选到不可达地址，导致服务器收不到日志。
 
 #### 步骤 4：配置日志级别（可选）
 
@@ -396,7 +403,7 @@ snmp-agent trap enable flash
 | 网管 IP 是否正确 | `display snmp-agent target-host` | IP 地址无误 |
 | 团体名是否一致 | `display snmp-agent community` | 和网管平台配置一致 |
 | 版本是否匹配 | `display snmp-agent` | 网管平台选的 v2c |
-| 网络是否可达 | `ping 192.168.1.100` | 交换机到网管服务器通 |
+| 网络是否可达 | `ping 192.168.1.240` | 交换机到网管服务器通 |
 | 防火墙是否放行 | — | UDP 162 端口未拦截 |
 | Trap 功能是否开启 | `display snmp-agent trap` | 各模块为 Enabled |
 
@@ -425,7 +432,7 @@ save
 | 信息中心是否开启 | `display info-center` | 首行状态为 `Enabled` |
 | 日志主机 IP 是否正确 | `display info-center loghost` | IP 地址无误 |
 | 源接口是否配置 | `info-center loghost source Vlan-interface 1` | 该接口已配 IP 且可达 |
-| 网络是否可达 | `ping 192.168.1.200` | 交换机到日志服务器通 |
+| 网络是否可达 | `ping 192.168.1.240` | 交换机到日志服务器通 |
 | 端口是否放行 | — | UDP 514 端口未拦截 |
 | facility 是否匹配 | `info-center loghost ... facility local4` | 与日志服务器侧一致 |
 
@@ -475,7 +482,7 @@ snmp-agent community read SnmP@R0_M0n1t0r_2026
 ```bash
 system-view
 acl number 2000
- rule permit source 192.168.1.100 0   # 只允许网管服务器
+ rule permit source 192.168.1.240 0   # 只允许网管服务器
  rule deny source any                  # 拒绝其他所有
  quit
 
@@ -492,7 +499,7 @@ SNMPv3 支持用户认证和报文加密，安全性远高于 v2c。S2126-EI 的
 snmp-agent sys-info version v3
 snmp-agent group v3 NMSGroup privacy
 snmp-agent usm-user v3 nmsadmin NMSGroup cipher Auth@2026! privacy Priv@2026!
-snmp-agent target-host trap address udp-domain 192.168.1.100 params securityname nmsadmin v3 privacy
+snmp-agent target-host trap address udp-domain 192.168.1.240 params securityname nmsadmin v3 privacy
 ```
 
 ---
@@ -504,8 +511,8 @@ snmp-agent target-host trap address udp-domain 192.168.1.100 params securityname
 | SNMP Agent | 未开启 | ✅ 已开启（v2c） |
 | 网管监控 | 不可监控 | ✅ 可采集数据 |
 | Trap 上报 | 无 | ✅ system/standard/configuration/flash 全开 |
-| 网管目标 | 无 | ✅ 192.168.1.100:162 |
-| Syslog 外发 | 无 | ✅ 192.168.1.200:514 |
+| 网管目标 | 无 | ✅ 192.168.1.240:162 |
+| Syslog 外发 | 无 | ✅ 192.168.1.240:514 |
 | Console 刷屏 | 狂刷端口日志 | ✅ 已静音（L2INF 屏蔽） |
 | 监控连续性 | 断断续续 | ✅ 稳定上报 |
 
@@ -530,3 +537,4 @@ snmp-agent target-host trap address udp-domain 192.168.1.100 params securityname
 ---
 
 > 📝 **文档说明：** 本文档基于 H3C S2126-EI（Comware V3.10, Release 2211P06）实测整理，不同版本命令可能略有差异，请以设备实际 `?` 帮助信息为准。
+
