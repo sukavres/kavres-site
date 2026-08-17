@@ -24,6 +24,29 @@ import remarkAdmonitionToBlockquoteCallout from "remark-admonition-to-blockquote
 import remarkDirective from "remark-directive"; /* Handle directives */
 import remarkMath from "remark-math";
 import remarkSectionize from "remark-sectionize";
+// 把段落/标题内的单换行渲染为 <br>，兼容 Typora 等编辑器的软换行习惯（等价于 remark-breaks，内联以避免新增依赖）
+function remarkBreaks() {
+	const BREAK_PARENTS = new Set(["paragraph", "heading"]);
+	const walk = (node) => {
+		if (!node || !Array.isArray(node.children)) return;
+		const out = [];
+		for (const child of node.children) {
+			if (child && child.type === "text" && typeof child.value === "string"
+				&& /[\n\r]/.test(child.value) && BREAK_PARENTS.has(node.type)) {
+				const parts = child.value.split(/[\n\r]+/);
+				parts.forEach((part, i) => {
+					if (i > 0) out.push({ type: "break", data: { hName: "br" } });
+					if (part !== "") out.push({ type: "text", value: part });
+				});
+			} else {
+				walk(child);
+				out.push(child);
+			}
+		}
+		node.children = out;
+	};
+	return (tree) => walk(tree);
+}
 import { expressiveCodeConfig, fontConfig, fontsList, mermaidConfig, plantumlConfig, siteConfig } from "./src/config";
 import { collectUsedFontCssVars } from "./src/utils/fontHelper";
 import I18nKey from "./src/i18n/i18nKey";
@@ -229,6 +252,7 @@ export default defineConfig({
 	markdown: {
 		processor: unified({
 			remarkPlugins: [
+				remarkBreaks,
 				...(siteConfig.post.rehypeCallouts.enablePythonMarkdownAdmonitions !== false
 					? [remarkAdmonitionToBlockquoteCallout]
 					: []),
